@@ -12,7 +12,7 @@ claude plugin marketplace add patrickdwyer33/pattymarket
 
 ### captain
 
-Mission and project management skills for Claude Code.
+Task and project management skills for Claude Code.
 
 **Install:**
 ```
