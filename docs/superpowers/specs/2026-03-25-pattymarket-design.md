@@ -85,10 +85,14 @@ One section per plugin with: description, install snippet, prerequisites, and a 
 
 ### Migration sequence
 
-Perform in this order. The pre-push hook must be removed before `release.sh` is ever run — if the hook fires during a push inside `release.sh`, it will auto-bump the version without updating the marketplace submodule, creating a mismatch. The submodule must also be verified working before the old marketplace.json is deleted.
+Perform in this order. The pre-push hook must be removed first — if it fires during any `git push` in the migration (including inside `release.sh`), it will auto-bump `plugin.json` without updating the marketplace submodule, causing a version mismatch. Avoid running `git push` on captain between steps 1 and the end of step 6. The submodule must also be verified working before the old `marketplace.json` is deleted.
 
-1. Remove the existing `pre-push` git hook (local filesystem delete — no git commit needed; `.git/hooks/` is not tracked)
-2. Add pattymarket as a git submodule in captain at `marketplace/` and verify it clones correctly
+1. Remove the existing `pre-push` git hook: `rm captain/.git/hooks/pre-push` (local filesystem delete — no git commit needed; `.git/hooks/` is not tracked)
+2. Add pattymarket as a git submodule in captain:
+   ```
+   git submodule add https://github.com/patrickdwyer33/pattymarket.git marketplace
+   ```
+   Verify the submodule clones and the `marketplace/` directory contains the expected files.
 3. Write `scripts/release.sh`
 4. Remove `captain/.claude-plugin/marketplace.json` (only after submodule is verified)
 5. Update captain's `README.md` install instructions (see "User install flow" section for the exact new snippet)
@@ -125,9 +129,11 @@ Perform in this order. The pre-push hook must be removed before `release.sh` is 
 3. Update version in captain's `package.json`
 4. Update the captain entry's `version` field in `marketplace/.claude-plugin/marketplace.json` (pattymarket submodule)
 5. In the submodule (`marketplace/`): `git add`, `git commit -m "chore: bump captain to vX.Y.Z"`, `git push origin main`
-6. In captain: `git add` version files and updated submodule ref, `git commit -m "chore: release vX.Y.Z"`, `git push origin main`
+6. In captain: `git add .claude-plugin/plugin.json package.json marketplace`, `git commit -m "chore: release vX.Y.Z"`, `git push origin main`
 
-**Partial failure:** If step 5 (submodule push) succeeds but step 6 (captain push) fails, the marketplace will advertise a version not yet present in captain's remote. Recovery: manually run `git push origin main` in the captain repo to complete the release, or run `./scripts/release.sh` with the next version (skipping the failed one).
+**Partial failure:** If step 5 (submodule push) succeeds but step 6 captain push fails:
+- If the captain commit was already made locally: `cd captain && git push origin main`
+- If the captain commit was not yet made: re-run `./scripts/release.sh` with the same version (it will overwrite the local file changes and re-commit)
 
 ---
 
