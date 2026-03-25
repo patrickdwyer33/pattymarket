@@ -1,12 +1,24 @@
 # pattymarket
 
-A public marketplace for Claude Code plugins.
+Patrick Dwyer's Claude Code plugin marketplace.
 
-## Project Docs
+## Add this marketplace
 
-| File | Purpose |
-| ---- | ------- |
-| [MISSIONS.md](MISSIONS.md) | Structured mission backlog — numbered missions with phases and sub-items |
-| [TODO.md](TODO.md) | Free-form scratchpad for quick notes, reminders, and in-progress thoughts |
-| [GAPS.md](GAPS.md) | Known code stubs, unimplemented functions, and placeholder values |
-| [IDEAS.md](IDEAS.md) | Long-term ideas and future directions, no commitment implied |
+```
+claude plugin marketplace add patrickdwyer33/pattymarket
+```
+
+## Plugins
+
+### captain
+
+Mission and project management skills for Claude Code.
+
+**Install:**
+```
+claude plugin install captain
+```
+
+**Requires:** [superpowers](https://github.com/obra/superpowers) plugin installed first
+
+**Docs & Skills:** [github.com/patrickdwyer33/captain](https://github.com/patrickdwyer33/captain)
