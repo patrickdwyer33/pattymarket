@@ -63,7 +63,7 @@ Structurally similar to plugin-repo marketplace.json files. The top-level `name`
 }
 ```
 
-The `version` field is the trigger Claude Code uses to detect and deliver updates. It must stay in sync with captain's `plugin.json` version on every release. The initial value is `1.0.4` — captain's current `plugin.json` version. Note: captain's existing `.claude-plugin/marketplace.json` shows `1.0.0` (it was never kept in sync); that file is being replaced entirely.
+The `version` field in the marketplace entry must stay in sync with captain's own `plugin.json` version on every release. Claude Code compares the installed plugin's `plugin.json` version against this field to detect updates — both must be bumped together. Initial value: `1.0.4` (captain's current `plugin.json` version). Note: captain's existing `.claude-plugin/marketplace.json` shows `1.0.0` (it was never kept in sync); that file is being replaced entirely.
 
 **User install flow** (`marketplace add` is a one-time global operation; `plugin install` is per-user):
 ```
@@ -85,22 +85,21 @@ One section per plugin with: description, install snippet, prerequisites, and a 
 
 ### Migration sequence
 
-Perform in this order. The submodule must be verified working before the old marketplace.json is deleted, to avoid a gap where neither file is in place:
+Perform in this order. The pre-push hook must be removed before `release.sh` is ever run — if the hook fires during a push inside `release.sh`, it will auto-bump the version without updating the marketplace submodule, creating a mismatch. The submodule must also be verified working before the old marketplace.json is deleted.
 
-1. Add pattymarket as a git submodule in captain at `marketplace/` and verify it clones correctly
-2. Write `scripts/release.sh`
-3. Verify `scripts/release.sh` works end-to-end in a dry run (or on a test branch) before proceeding
-4. Remove `captain/.claude-plugin/marketplace.json`
-5. Remove the existing `pre-push` git hook
-6. Update captain's `README.md` install instructions
-7. Run `./scripts/release.sh` to publish the first release via the new flow
+1. Remove the existing `pre-push` git hook (local filesystem delete — no git commit needed; `.git/hooks/` is not tracked)
+2. Add pattymarket as a git submodule in captain at `marketplace/` and verify it clones correctly
+3. Write `scripts/release.sh`
+4. Remove `captain/.claude-plugin/marketplace.json` (only after submodule is verified)
+5. Update captain's `README.md` install instructions (see "User install flow" section for the exact new snippet)
+6. Run `./scripts/release.sh` to publish the first release via the new flow
 
 ### Changes to captain repo
 
 - Add pattymarket as a **git submodule** at `marketplace/`
 - Add `scripts/release.sh` — `scripts/generate.sh` is unrelated and stays untouched
 - Remove `.claude-plugin/marketplace.json` (only after submodule is verified)
-- Remove `.git/hooks/pre-push` — direct pushes to captain will no longer auto-bump the version; this is intentional. `release.sh` is now the explicit release mechanism. Ad-hoc pushes (WIP, docs fixes) are not releases and should not bump the version.
+- Remove `.git/hooks/pre-push` (local filesystem delete, no git commit) — direct pushes to captain will no longer auto-bump the version; this is intentional. `release.sh` is now the explicit release mechanism. Ad-hoc pushes (WIP, docs fixes) are not releases and should not bump the version.
 - Update `README.md`: change install instructions from `claude plugin marketplace add patrickdwyer33/captain` to `claude plugin marketplace add patrickdwyer33/pattymarket`
 
 ### Changes to pattymarket repo
@@ -128,7 +127,7 @@ Perform in this order. The submodule must be verified working before the old mar
 5. In the submodule (`marketplace/`): `git add`, `git commit -m "chore: bump captain to vX.Y.Z"`, `git push origin main`
 6. In captain: `git add` version files and updated submodule ref, `git commit -m "chore: release vX.Y.Z"`, `git push origin main`
 
-**Partial failure:** If step 5 (submodule push) succeeds but step 6 (captain push) fails, the marketplace will advertise a version not yet present in captain's remote. Recovery: re-run `./scripts/release.sh` with the same version — the script should be idempotent if the version is already set correctly, or the developer manually pushes captain.
+**Partial failure:** If step 5 (submodule push) succeeds but step 6 (captain push) fails, the marketplace will advertise a version not yet present in captain's remote. Recovery: manually run `git push origin main` in the captain repo to complete the release, or run `./scripts/release.sh` with the next version (skipping the failed one).
 
 ---
 
