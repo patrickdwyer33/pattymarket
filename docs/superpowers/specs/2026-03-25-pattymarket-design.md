@@ -34,7 +34,7 @@ pattymarket/
 
 **File:** `.claude-plugin/marketplace.json`
 
-Format mirrors the existing captain marketplace.json convention:
+Structurally similar to plugin-repo marketplace.json files, but the top-level `name` and `description` describe the marketplace itself, not any single plugin:
 
 ```json
 {
@@ -48,7 +48,7 @@ Format mirrors the existing captain marketplace.json convention:
     {
       "name": "captain",
       "description": "Task and project management skills for Claude Code. Requires superpowers plugin.",
-      "version": "1.0.3",
+      "version": "1.0.4",
       "source": {
         "source": "url",
         "url": "https://github.com/patrickdwyer33/captain.git"
@@ -62,7 +62,7 @@ Format mirrors the existing captain marketplace.json convention:
 }
 ```
 
-The `version` field is the trigger Claude Code uses to detect and deliver updates. It must stay in sync with captain's `plugin.json` version on every release.
+The `version` field is the trigger Claude Code uses to detect and deliver updates. It must stay in sync with captain's `plugin.json` version on every release. The initial value is `1.0.4` (captain's current version at time of migration).
 
 **User install flow:**
 ```
@@ -70,60 +70,51 @@ claude plugin marketplace add patrickdwyer33/pattymarket
 claude plugin install captain
 ```
 
+**Note:** Users who previously added `patrickdwyer33/captain` as a marketplace will need to re-add `patrickdwyer33/pattymarket` to receive future updates. Migrating existing users is out of scope for this mission.
+
 ---
 
 ## Human-Readable Catalog (README.md)
 
-One section per plugin with: description, install snippet, prerequisites, and a link to the source repo for full docs.
-
-```markdown
-# pattymarket
-
-Patrick Dwyer's Claude Code plugin marketplace.
-
-## Add this marketplace
-
-claude plugin marketplace add patrickdwyer33/pattymarket
-
-## Plugins
-
-### captain
-
-Mission and project management for Claude Code.
-
-**Install:** `claude plugin install captain`
-**Requires:** superpowers plugin
-**Docs:** https://github.com/patrickdwyer33/captain
-```
-
-The README links out to each plugin's source repo for skills lists, changelogs, and full documentation. No content is duplicated.
+One section per plugin with: description, install snippet, prerequisites, and a link to the source repo for full docs. No content is duplicated from source repos — the README links out to each plugin's own repository for skills lists, changelogs, and full documentation.
 
 ---
 
 ## Captain Migration
 
+### Migration sequence
+
+Perform changes in this order to avoid a window where both marketplace.json files exist simultaneously:
+
+1. Add pattymarket as a git submodule in captain at `marketplace/`
+2. Write `scripts/release.sh` (see Release Flow)
+3. Remove `captain/.claude-plugin/marketplace.json`
+4. Remove the existing `pre-push` git hook
+5. Update captain's `README.md` install instructions
+6. Run `./scripts/release.sh` to publish the first release via the new flow
+
 ### Changes to captain repo
 
-1. Remove `.claude-plugin/marketplace.json` from captain — marketplace responsibility moves to pattymarket.
-2. Add pattymarket as a **git submodule** in captain at `marketplace/`.
-3. Remove the existing `pre-push` git hook (version bumping moves to an explicit release script).
-4. Add `scripts/release.sh` (see Release Flow below).
-5. Update captain's `README.md` install instructions to reference `patrickdwyer33/pattymarket`.
+- Add pattymarket as a **git submodule** at `marketplace/`
+- Add `scripts/release.sh` (see below) — `scripts/generate.sh` is unrelated and stays untouched
+- Remove `.claude-plugin/marketplace.json` (marketplace responsibility moves to pattymarket)
+- Remove `.git/hooks/pre-push` (version bumping moves to `release.sh`; direct pushes to captain will no longer auto-bump the version — this is intentional, version management is now explicit)
+- Update `README.md`: change install instructions from `claude plugin marketplace add patrickdwyer33/captain` to `claude plugin marketplace add patrickdwyer33/pattymarket`
 
 ### Changes to pattymarket repo
 
-1. Add `.claude-plugin/marketplace.json` with captain as the first entry.
-2. Update `README.md` to serve as the human catalog.
+- Add `.claude-plugin/marketplace.json` with captain as the first entry
+- Rewrite `README.md` to serve as the human catalog
 
 ---
 
 ## Release Flow
 
-`scripts/release.sh` in the captain repo handles all version bumping and publishing in one shot.
+`scripts/release.sh` in the captain repo handles all version bumping and publishing.
 
 **Usage:**
 ```bash
-./scripts/release.sh           # auto-bumps patch: 1.0.3 → 1.0.4
+./scripts/release.sh           # auto-bumps patch: 1.0.4 → 1.0.5
 ./scripts/release.sh 2.0.0    # explicit version for major/minor releases
 ```
 
@@ -131,10 +122,9 @@ The README links out to each plugin's source repo for skills lists, changelogs, 
 1. Determine new version (arg if provided, else bump patch of current version in `plugin.json`)
 2. Update version in captain's `.claude-plugin/plugin.json`
 3. Update version in captain's `package.json`
-4. Update the captain entry's `version` field in `marketplace/` (pattymarket submodule) `.claude-plugin/marketplace.json`
-5. Commit + push the submodule (`marketplace/`)
-6. Commit the updated submodule ref + version files in captain
-7. Push captain
+4. Update the captain entry's `version` field in `marketplace/.claude-plugin/marketplace.json` (pattymarket submodule)
+5. In the submodule (`marketplace/`): `git add`, `git commit -m "chore: bump captain to vX.Y.Z"`, `git push origin main`
+6. In captain: `git add` the version files and updated submodule ref, `git commit -m "chore: release vX.Y.Z"`, `git push origin main`
 
 ---
 
@@ -143,3 +133,4 @@ The README links out to each plugin's source repo for skills lists, changelogs, 
 - No static site / GitHub Pages — README is the human interface
 - No per-plugin markdown files — each plugin's own repo is the source of truth
 - No GitHub Actions — release script is the release mechanism
+- Migrating existing users who added `patrickdwyer33/captain` as a marketplace
