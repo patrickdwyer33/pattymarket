@@ -2,6 +2,8 @@
 
 See also: [GAPS.md](GAPS.md) — known code stubs to implement | [IDEAS.md](IDEAS.md) — long-term ideas
 
+# Completed Missions
+
 ## Mission 1: Add captain plugin listing
 
 **Goal:** Publish the captain Claude Code plugin as the first entry in pattymarket, establishing the marketplace's structure and content.
@@ -20,5 +22,3 @@ See also: [GAPS.md](GAPS.md) — known code stubs to implement | [IDEAS.md](IDEA
 **Phase 3 — Polish and publish**
 - Update README.md to explain the marketplace and how to browse/install plugins
 - Commit and push
-
-# Completed Missions
