@@ -31,6 +31,19 @@
         "name": "Patrick Dwyer",
         "email": "patrick@patrickdwyer.com"
       }
+    },
+    {
+      "name": "beads-orc",
+      "description": "Orchestrates beads (br) issue tracking: per-repo backlogs, atomic claims, worktree coordination, cmux labeling.",
+      "version": "0.1.0",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/patrickdwyer33/beads.git"
+      },
+      "author": {
+        "name": "Patrick Dwyer",
+        "email": "patrick@patrickdwyer.com"
+      }
     }
   ]
 }
