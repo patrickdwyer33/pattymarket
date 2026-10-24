@@ -10,15 +10,24 @@ claude plugin marketplace add patrickdwyer33/pattymarket
 
 ## Plugins
 
-### captain
+### read-sql-server
 
-Task and project management skills for Claude Code.
+MCP server for connecting to a SQL Server instance with SQL Auth and running read-only schema/discovery queries.
 
 **Install:**
 ```
-claude plugin install captain
+claude plugin install read-sql-server
 ```
 
-**Requires:** [superpowers](https://github.com/obra/superpowers) plugin installed first
+**Docs & source:** [github.com/patrickdwyer33/read-sql-server](https://github.com/patrickdwyer33/read-sql-server)
 
-**Docs & Skills:** [github.com/patrickdwyer33/captain](https://github.com/patrickdwyer33/captain)
+### beads-orc
+
+Orchestrates beads (`br`) issue tracking: per-repo backlogs, atomic claims, worktree coordination, cmux labeling.
+
+**Install:**
+```
+claude plugin install beads-orc
+```
+
+**Docs & source:** [github.com/patrickdwyer33/beads](https://github.com/patrickdwyer33/beads)
